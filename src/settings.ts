@@ -5,6 +5,7 @@ import {blogRoute} from "./routes/blog-route";
 import {usersRouter} from "./routes/users-router";
 import {authRouter} from "./routes/auth-router";
 import {commentRouter} from "./routes/comment-router";
+import cookieParser from "cookie-parser";
 
 export const app = express();
 
@@ -15,6 +16,7 @@ app.use('/blogs', blogRoute)
 app.use('/users', usersRouter)
 app.use('/auth', authRouter)
 app.use('/comments', commentRouter)
+app.use(cookieParser())
 
 app.delete('/testing/all-data', async (req:Request, res: Response)=>{
     await blogCollection.deleteMany({})
