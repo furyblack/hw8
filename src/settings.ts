@@ -10,13 +10,14 @@ import cookieParser from "cookie-parser";
 export const app = express();
 
 // подключение роутеров
+app.use(cookieParser())
 app.use(express.json())
 app.use('/posts', postRoute)
 app.use('/blogs', blogRoute)
 app.use('/users', usersRouter)
 app.use('/auth', authRouter)
 app.use('/comments', commentRouter)
-app.use(cookieParser())
+
 
 app.delete('/testing/all-data', async (req:Request, res: Response)=>{
     await blogCollection.deleteMany({})
