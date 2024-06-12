@@ -48,10 +48,10 @@ export const    UsersService = {
         const hash = await bcrypt.hash(password, salt)
         return hash
     },
+
     async checkCredentials(loginOrEmail: string, password: string){
-        console.log(loginOrEmail, "llll")
+
         const user:WithId<UserAccountDBType> | null = await UsersRepository.findByLoginOrEmail(loginOrEmail)
-        console.log(user, '444444444444')
         if(!user) return null
         const passwordHash = await this._generateHash(password, user.accountData.passwordSalt)
         if(user.accountData.passwordHash !== passwordHash){

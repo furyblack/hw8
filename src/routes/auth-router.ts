@@ -12,16 +12,25 @@ import {
 } from "../middlewares/auth/auth-middleware";
 
 export const authRouter = Router({});
-
+//TODO добавить валидацию
 authRouter.post('/login', async (req: RequestWithBody<LoginUserType>, res: Response) =>{
     const user:WithId<UserAccountDBType> | null = await UsersService.checkCredentials(req.body.loginOrEmail, req.body.password)
     if(!user){
         res.sendStatus(401)
         return
     }
-    const token = await jwtService.createJWT(user)
-    res.status(200).send({accessToken:token})
+    const token = await jwtService.createAccessToken(user)
+    const refreshToken = await jwtService.createRefreshToken(user)
+    res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true,})
+    res.status(200).send({ accessToken: token });
 })
+//TODO 0) сделать мидлвар с пунктами 1-2
+// 1) доставить из куки  refresh token
+// 2) проверить токен на протухание:
+//      а) сказать клиенту 401
+//      b)идем дальше
+// 3) повторяем выдачу токенов как в логине
+
 
 authRouter.get('/me', authMiddlewareBearer, async (req: Request, res: Response<CurrentUserType>) => {
     const user = req.userDto;
