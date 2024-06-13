@@ -25,22 +25,16 @@ authRouter.post('/login', loginzationValidation(), async (req: RequestWithBody<L
     res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true,})
     res.status(200).send({ accessToken: token });
 })
-//TODO 0) сделать мидлвар с пунктами 1-2
-// 1) доставить из куки  refresh token
-// 2) проверить токен на протухание:
-//      а) сказать клиенту 401
-//      b)идем дальше
-// 3) повторяем выдачу токенов как в логине
 
-authRouter.post('/refresh-token', authMiddlewareRefresh, async (req:Request, res:Response)=>{
-    const refreshTok:WithId<UserAccountDBType>|null = await UsersService.checkCredentials(req.body.loginOrEmail, req.body.password)
-    if(!refreshTok){
-        res.sendStatus(401)
-        return
-    }
-    const refreshToken = await jwtService.createRefreshToken(refreshTok)
-    res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true,})
-})
+authRouter.post('/refresh-token', authMiddlewareRefresh, async (req: Request, res: Response) => {
+    const user = req.userDto as WithId<UserAccountDBType>;
+
+    const newAccessToken = await jwtService.createAccessToken(user);
+    const newRefreshToken = await jwtService.createRefreshToken(user);
+
+    res.cookie('refreshToken', newRefreshToken, { httpOnly: true, secure: true });
+    res.status(200).send({ accessToken: newAccessToken });
+});
 
 authRouter.get('/me', authMiddlewareBearer, async (req: Request, res: Response<CurrentUserType>) => {
     const user = req.userDto;
