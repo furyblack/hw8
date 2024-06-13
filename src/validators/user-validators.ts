@@ -8,6 +8,8 @@ const loginValidator = body('login').isString().withMessage('Login must be a str
     max: 10
 }).withMessage('Incorrect login length')
 
+const loginOrEmailValidator = body('loginOrEmail').isString().withMessage('loginOrEmail must be a string').trim().withMessage('Incorrect loginOrEmail length')
+
 const passwordValidator = body('password').isString().withMessage('Password must be a string').trim().isLength({
     min: 6,
     max: 20
@@ -17,3 +19,6 @@ const emailValidator = body('email').isString().withMessage('Email must be a str
 ).withMessage('Incorrect websiteUrl')
 
 export const userValidation = () =>[loginValidator, passwordValidator, emailValidator, inputValidationMiddleware]
+//добавить валидатор логин и email смесь loginValidator loginValidator
+
+export const loginzationValidation = () =>[loginOrEmailValidator, passwordValidator, inputValidationMiddleware]

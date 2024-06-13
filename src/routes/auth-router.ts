@@ -6,14 +6,15 @@ import { jwtService } from "../application/jwt-service";
 import { WithId } from "mongodb";
 import { CurrentUserType } from "../types/users/outputUserType";
 import {
-    authMiddlewareBearer,
+    authMiddlewareBearer, authMiddlewareRefresh,
     emailResendingValidation,
     registrationValidation,
 } from "../middlewares/auth/auth-middleware";
+import {loginzationValidation} from "../validators/user-validators";
 
 export const authRouter = Router({});
-//TODO добавить валидацию
-authRouter.post('/login', async (req: RequestWithBody<LoginUserType>, res: Response) =>{
+
+authRouter.post('/login', loginzationValidation(), async (req: RequestWithBody<LoginUserType>, res: Response) =>{
     const user:WithId<UserAccountDBType> | null = await UsersService.checkCredentials(req.body.loginOrEmail, req.body.password)
     if(!user){
         res.sendStatus(401)
@@ -31,6 +32,15 @@ authRouter.post('/login', async (req: RequestWithBody<LoginUserType>, res: Respo
 //      b)идем дальше
 // 3) повторяем выдачу токенов как в логине
 
+authRouter.post('/refresh-token', authMiddlewareRefresh, async (req:Request, res:Response)=>{
+    const refreshTok:WithId<UserAccountDBType>|null = await UsersService.checkCredentials(req.body.loginOrEmail, req.body.password)
+    if(!refreshTok){
+        res.sendStatus(401)
+        return
+    }
+    const refreshToken = await jwtService.createRefreshToken(refreshTok)
+    res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true,})
+})
 
 authRouter.get('/me', authMiddlewareBearer, async (req: Request, res: Response<CurrentUserType>) => {
     const user = req.userDto;

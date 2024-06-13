@@ -4,6 +4,7 @@ import {UsersRepository} from "../../repositories/users-repository";
 import {usersCollection} from "../../db/db";
 import {body} from "express-validator";
 import {inputValidationMiddleware} from "../inputValidation/input-validation-middleware";
+import cookieParser from "cookie-parser";
 
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) =>{
@@ -29,6 +30,8 @@ export const authMiddlewareBearer = async (req:Request,res:Response,next:NextFun
     res.sendStatus(401)
     return
 }
+//похожий на authMiddlewareBearer
+
 
 export const uniqEmailValidator = body("email")
     .matches(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/)
@@ -75,6 +78,31 @@ export const userConfiemedValidor = body("email")
     }
     return true
 });
+
+export const authMiddlewareRefresh = async (req: Request, res: Response, next: NextFunction) => {
+    const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+        res.sendStatus(401); // Если токен отсутствует, возвращаем 401
+        return;
+    }
+
+    try {
+        const userId = await jwtService.getUserIdByRefreshToken(refreshToken);
+        const user = await UsersRepository.findUserById(userId);
+
+        if (!user) {
+            res.sendStatus(401); // Если пользователь не найден, возвращаем 401
+            return;
+        }
+
+        req.userDto = user; // Добавляем пользователя в объект запроса
+        next(); // Передаем управление следующему middleware
+    } catch (error) {
+        res.sendStatus(401); // Если токен протух или неверный, возвращаем 401
+    }
+};
+
 
 export const  registrationValidation = () =>[uniqEmailValidator, passwordValidator, uniqLoginValidator,  inputValidationMiddleware]
 export const  emailResendingValidation = () =>[userConfiemedValidor, inputValidationMiddleware]
