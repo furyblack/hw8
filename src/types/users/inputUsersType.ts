@@ -44,3 +44,8 @@ export type userQuerySortData = {
     searchLoginTerm?: string,
     searchEmailTerm?: string,
 }
+
+export type BlacklistedTokenType = {
+    token: string,
+    blacklistedAt: Date
+}

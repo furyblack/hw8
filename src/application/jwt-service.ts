@@ -1,20 +1,15 @@
-import { WithId} from "mongodb";
+import {WithId} from "mongodb";
 import jwt from 'jsonwebtoken';
-import {UserAccountDBType, UserMongoDbType} from "../types/users/inputUsersType";
+import {UserAccountDBType} from "../types/users/inputUsersType";
+import {refreshBlackListCollection} from "../db/db";
 
-
-// const secretKey = 'your_secret_key';
 const refreshTokenSecret = 'your_refresh_token_secret';
-// const tokenExpiration = '1h';  // Время жизни access токена
 const refreshTokenExpiration = '20s';  // Время жизни refresh токена
-
 
 export const jwtService={
 
-
     async  createAccessToken(user:WithId<UserAccountDBType>){
-        const token = jwt.sign({userId:user._id}, process.env.JWT_SECRET as string, {expiresIn: '10s'})
-        return token
+        return jwt.sign({userId: user._id}, process.env.JWT_SECRET as string, {expiresIn: '10s'})
 
     },
     async createRefreshToken(user: WithId<UserAccountDBType>) {
@@ -30,8 +25,13 @@ export const jwtService={
         }
     },
     async verifyRefreshToken(token: string) {
+        const blacklistedToken = await refreshBlackListCollection.findOne({ token });
+        if (blacklistedToken) {
+            throw new Error('Token is blacklisted');
+        }
         return jwt.verify(token, refreshTokenSecret);
     },
+
     async getUserIdByRefreshToken(token: string) {
         try {
             const result: any = await this.verifyRefreshToken(token);
@@ -39,6 +39,8 @@ export const jwtService={
         } catch (error) {
             return null;
         }
+    },
+    async revokeRefreshToken(token: string) {
+        await refreshBlackListCollection.insertOne({ token, blacklistedAt: new Date() });
     }
-
 }

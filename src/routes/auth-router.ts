@@ -27,13 +27,39 @@ authRouter.post('/login', loginzationValidation(), async (req: RequestWithBody<L
 })
 
 authRouter.post('/refresh-token', authMiddlewareRefresh, async (req: Request, res: Response) => {
+    const oldRefreshToken = req.cookies?.refreshToken;
     const user = req.userDto as WithId<UserAccountDBType>;
+
+    if (!oldRefreshToken || !user) {
+        res.sendStatus(401);
+        return;
+    }
 
     const newAccessToken = await jwtService.createAccessToken(user);
     const newRefreshToken = await jwtService.createRefreshToken(user);
 
+    // Добавляем старый refresh токен в черный список
+    await jwtService.revokeRefreshToken(oldRefreshToken);
+
     res.cookie('refreshToken', newRefreshToken, { httpOnly: true, secure: true });
     res.status(200).send({ accessToken: newAccessToken });
+})
+
+authRouter.post('/logout', authMiddlewareRefresh, async (req: Request, res: Response) => {
+    const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+        res.sendStatus(401);
+        return;
+    }
+
+    try {
+        await jwtService.revokeRefreshToken(refreshToken);
+        res.clearCookie('refreshToken');
+        res.sendStatus(204); // No Content
+    } catch (error) {
+        res.sendStatus(401); // Unauthorized
+    }
 });
 
 authRouter.get('/me', authMiddlewareBearer, async (req: Request, res: Response<CurrentUserType>) => {

@@ -1,10 +1,8 @@
 import * as dotenv from "dotenv";
 import { BlogMongoDbType} from "../types/blogs/output";
-
-
 import { PostMongoDbType} from "../types/posts/output";
 import {Collection, MongoClient} from "mongodb";
-import {UserAccountDBType} from "../types/users/inputUsersType";
+import {BlacklistedTokenType, UserAccountDBType} from "../types/users/inputUsersType";
 import {CommentMongoDbType} from "../types/comment/output-comment-type";
 
 //пытаюсь подключить бд
@@ -20,6 +18,8 @@ export const postCollection: Collection<PostMongoDbType> = mongoDb.collection<Po
 export const commentCollection: Collection<CommentMongoDbType> = mongoDb.collection<CommentMongoDbType>('comment')
 
 export const usersCollection: Collection<UserAccountDBType> = mongoDb.collection<UserAccountDBType>("user")
+
+export const refreshBlackListCollection: Collection<BlacklistedTokenType> = mongoDb.collection<BlacklistedTokenType>("blacklist")
 
 
 export async  function connectMongo (){

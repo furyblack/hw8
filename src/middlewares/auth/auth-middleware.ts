@@ -4,7 +4,6 @@ import {UsersRepository} from "../../repositories/users-repository";
 import {usersCollection} from "../../db/db";
 import {body} from "express-validator";
 import {inputValidationMiddleware} from "../inputValidation/input-validation-middleware";
-import cookieParser from "cookie-parser";
 
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) =>{
@@ -30,8 +29,6 @@ export const authMiddlewareBearer = async (req:Request,res:Response,next:NextFun
     res.sendStatus(401)
     return
 }
-//похожий на authMiddlewareBearer
-
 
 export const uniqEmailValidator = body("email")
     .matches(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/)
