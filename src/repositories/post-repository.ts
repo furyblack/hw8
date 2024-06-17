@@ -5,7 +5,6 @@ import {QueryPostRepository} from "./query-post-repository";
 import {QueryBlogRepository} from "./query-blog-repository";
 import {ObjectId, WithId} from "mongodb";
 
-
 export class PostMapper{
     static toDto(post:PostMongoDbType):PostOutputType{
         return {

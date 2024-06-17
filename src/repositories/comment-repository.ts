@@ -4,7 +4,6 @@ import {commentCollection} from "../db/db";
 import {UpdateCommentType} from "../types/comment/input-comment-type";
 import {QueryCommentRepository} from "./query-comment-repository";
 
-
 export class CommentMapper {
     static toDto(comment: WithId<CommentMongoDbType>): CommentOutputType {
         return {

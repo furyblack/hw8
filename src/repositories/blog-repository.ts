@@ -3,7 +3,6 @@ import {CreateNewBlogType, UpdateBlogType} from "../types/blogs/input";
 import {BlogOutputType, BlogMongoDbType} from "../types/blogs/output";
 import {ObjectId, WithId} from "mongodb";
 
-
 export class BlogMapper {
     static toDto(blog: WithId<BlogMongoDbType>): BlogOutputType {
         return {
